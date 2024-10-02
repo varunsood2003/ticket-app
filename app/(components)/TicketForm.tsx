@@ -10,7 +10,7 @@ const TicketForm = () => {
     category: "Software",
     priority: 1,
     progress: 0,
-    status: "Not yet started",
+    status: "Not yet started", // Fix status case
   };
 
   const handleChange = (
@@ -18,7 +18,7 @@ const TicketForm = () => {
       HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement
     >
   ) => {
-    const value = e.target.value;
+    const value = e.target.type === "range" ? parseInt(e.target.value) : e.target.value; // Handle range input
     const name = e.target.name;
     setFormData((prev) => ({
       ...prev,
@@ -151,12 +151,37 @@ const TicketForm = () => {
         >
           Progress
         </label>
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors mt-4"
+        <input
+          type="range"
+          id="progress"
+          name="progress"
+          value={formData.progress}
+          min="0"
+          max="100"
+          onChange={handleChange}
+          className="w-full"
+        />
+        <label
+          htmlFor="status"
+          className="block text-sm font-medium text-gray-700 mb-2 mt-2"
         >
-          Submit
-        </button>
+          Status
+        </label>
+        <select
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          className="w-full text-black px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        >
+          <option value="Not yet started">Not yet started</option>
+          <option value="Started">Started</option>
+          <option value="Done">Done</option>
+        </select>
+        <input
+          type="submit"
+          className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-md"
+          value="Create Ticket"
+        />
       </form>
     </div>
   );
