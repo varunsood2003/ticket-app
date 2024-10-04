@@ -1,16 +1,19 @@
 "use client";
 
+import { error } from "console";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 
 const TicketForm = () => {
+  const router = useRouter();
   const startingData = {
     title: "",
     description: "",
     category: "Software",
     priority: 1,
     progress: 0,
-    status: "Not yet started", // Fix status case
+    status: "Not yet started",
+    active: true
   };
 
   const handleChange = (
@@ -18,7 +21,8 @@ const TicketForm = () => {
       HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement
     >
   ) => {
-    const value = e.target.type === "range" ? parseInt(e.target.value) : e.target.value; // Handle range input
+    const value =
+      e.target.type === "range" ? parseInt(e.target.value) : e.target.value; // Handle range input
     const name = e.target.name;
     setFormData((prev) => ({
       ...prev,
@@ -26,9 +30,20 @@ const TicketForm = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("submitted", formData);
+    const res = await fetch("/api/Tickets", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+    if (!res.ok) {
+      throw new Error("Failed");
+    }
+    router.refresh()
+    router.push("/");
   };
 
   const [formData, setFormData] = useState(startingData);

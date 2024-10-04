@@ -4,7 +4,7 @@ import PriorityDisplay from "./PriorityDisplay";
 import ProgressBar from "./ProgressBar";
 import StatusDisplay from "./StatusDisplay";
 
-const TicketCard = () => {
+const TicketCard = ({ticket}:any) => {
   return (
     <div className="flex flex-col bg-card hover:bg-card-hover rounded-md shadow-lg p-3 m-2">
       <div className="flex mb-3">
@@ -13,10 +13,10 @@ const TicketCard = () => {
           <DeleteBlock />
         </div>
       </div>
-      <h4>Ticket Title</h4>
+      <h4>{ticket.title}</h4>
       <hr className="h-px border-0 bg-page mb-2"/>
       <p className="whitespace-pre-wrap">
-        This is the title description
+        {ticket.description}
       </p>
       <div className="flex-grow"></div>
       <div className="flex mt-2">
