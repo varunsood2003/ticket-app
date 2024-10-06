@@ -8,6 +8,10 @@ interface Params{
 }
 
 const page = ({params}:Params) => {
+  const EDITMODE = params.id === "new" ? false : true;
+  if(EDITMODE){
+
+  }
   return (
     <TicketForm/>
   )

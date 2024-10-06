@@ -1,11 +1,21 @@
-import React from 'react'
+import React from "react";
 
-const StatusDisplay = () => {
-  return (
-    <span className='inline-block rounded-full px-2 py-1 text-xs font-semibold text-black bg-green-200'>
-        done
-    </span>
-  )
+interface Status {
+  status: string;
 }
 
-export default StatusDisplay
+const StatusDisplay = ({ status }: Status) => {
+  return (
+    <span
+      className={`inline-block rounded-full px-2 py-1 text-xs font-semibold text-black ${
+        (status == "Done" && "bg-green-200") ||
+        (status == "Not yet started" && "bg-red-200") ||
+        (status == "Started" && "bg-yellow-200")
+      } `}
+    >
+      {status}
+    </span>
+  );
+};
+
+export default StatusDisplay;

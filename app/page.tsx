@@ -24,7 +24,6 @@ const getTickets = async () =>{
 
 export default async function Home() {
   const { tickets } = await getTickets();
-  console.log(tickets);
 //@ts-ignore
   const uniqueCategories = [...new Set(tickets?.map(ticket => ticket.category.trim()))];
 
