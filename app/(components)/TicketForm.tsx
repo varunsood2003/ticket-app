@@ -1,52 +1,74 @@
 "use client";
 
-import { error } from "console";
 import { useRouter } from "next/navigation";
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 
-const TicketForm = () => {
+const TicketForm = ({ updatedData,editMode }: any) => {
   const router = useRouter();
-  const startingData = {
+  const fixedData = updatedData.res;
+  const defaultData = {
     title: "",
     description: "",
     category: "Software",
     priority: 1,
     progress: 0,
     status: "Not yet started",
-    active: true
+    active: true,
   };
 
+  const [formData, setFormData] = useState(fixedData || defaultData);
+
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement>
   ) => {
-    const value =
-      e.target.type === "range" ? parseInt(e.target.value) : e.target.value; // Handle range input
-    const name = e.target.name;
-    setFormData((prev) => ({
+    const { name, value, type } = e.target;
+    const newValue = type === "radio" ? parseInt(value) : value;
+    setFormData((prev:any) => ({
       ...prev,
-      [name]: value,
+      [name]: newValue,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const res = await fetch("/api/Tickets", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-    if (!res.ok) {
-      throw new Error("Failed");
+  
+    try {
+      let res;
+      if (editMode) {
+        const { createdAt, updatedAt, ...filteredData } = formData;
+        res = await fetch(`/api/Tickets/${formData._id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(filteredData),
+        });
+  
+        if (!res.ok) {
+          throw new Error("Failed to update ticket");
+        }
+      } else {
+        const { createdAt, updatedAt, ...filteredData } = formData; 
+        res = await fetch("/api/Tickets", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(filteredData),
+        });
+  
+        if (!res.ok) {
+          throw new Error("Failed to create ticket");
+        }
+      }
+      router.refresh();
+      window.location.href = '/';
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while creating/updating the ticket. Please try again.");
     }
-    router.refresh()
-    router.push("/");
   };
-
-  const [formData, setFormData] = useState(startingData);
+  
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-page">
@@ -56,14 +78,11 @@ const TicketForm = () => {
         className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
       >
         <h3 className="text-xl font-semibold mb-6 text-gray-800">
-          Create Your Ticket
+          {editMode ? "Update Ticket": "Create New Ticket"}
         </h3>
 
         <div className="mb-4">
-          <label
-            htmlFor="title"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
+          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
             Title
           </label>
           <input
@@ -75,10 +94,7 @@ const TicketForm = () => {
             value={formData.title}
             className="w-full text-black px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           />
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-700 mb-2 mt-2"
-          >
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2 mt-2">
             Description
           </label>
           <textarea
@@ -91,10 +107,7 @@ const TicketForm = () => {
           />
         </div>
 
-        <label
-          htmlFor="category"
-          className="block text-sm font-medium text-gray-700 mb-2 mt-2"
-        >
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2 mt-2">
           Category
         </label>
         <select
@@ -107,63 +120,27 @@ const TicketForm = () => {
           <option value="Hardware">Hardware</option>
           <option value="Project">Project</option>
         </select>
-        <label
-          htmlFor="priority"
-          className="block text-sm font-medium text-gray-700 mb-2 mt-2"
-        >
+
+        <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2 mt-2">
           Priority
         </label>
         <div>
-          <input
-            type="radio"
-            id="priority-1"
-            name="priority"
-            onChange={handleChange}
-            value={1}
-            checked={formData.priority == 1}
-          />
-          <label className="px-2 text-black">1</label>
-          <input
-            type="radio"
-            id="priority-2"
-            name="priority"
-            onChange={handleChange}
-            value={2}
-            checked={formData.priority == 2}
-          />
-          <label className="px-2 text-black">2</label>
-          <input
-            type="radio"
-            id="priority-3"
-            name="priority"
-            onChange={handleChange}
-            value={3}
-            checked={formData.priority == 3}
-          />
-          <label className="px-2 text-black">3</label>
-          <input
-            type="radio"
-            id="priority-4"
-            name="priority"
-            onChange={handleChange}
-            value={4}
-            checked={formData.priority == 4}
-          />
-          <label className="px-2 text-black">4</label>
-          <input
-            type="radio"
-            id="priority-5"
-            name="priority"
-            onChange={handleChange}
-            value={5}
-            checked={formData.priority == 5}
-          />
-          <label className="px-2 text-black">5</label>
+          {[1, 2, 3, 4, 5].map((priority) => (
+            <div key={priority}>
+              <input
+                type="radio"
+                id={`priority-${priority}`}
+                name="priority"
+                onChange={handleChange}
+                value={priority}
+                checked={formData.priority === priority}
+              />
+              <label className="px-2 text-black">{priority}</label>
+            </div>
+          ))}
         </div>
-        <label
-          htmlFor="priority"
-          className="block text-sm font-medium text-gray-700 mb-2 mt-2"
-        >
+
+        <label htmlFor="progress" className="block text-sm font-medium text-gray-700 mb-2 mt-2">
           Progress
         </label>
         <input
@@ -176,10 +153,8 @@ const TicketForm = () => {
           onChange={handleChange}
           className="w-full"
         />
-        <label
-          htmlFor="status"
-          className="block text-sm font-medium text-gray-700 mb-2 mt-2"
-        >
+
+        <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2 mt-2">
           Status
         </label>
         <select
@@ -195,7 +170,7 @@ const TicketForm = () => {
         <input
           type="submit"
           className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-md"
-          value="Create Ticket"
+          value={editMode ? "Update Ticket": "Create Ticket"}
         />
       </form>
     </div>

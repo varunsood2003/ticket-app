@@ -31,3 +31,26 @@ export async function DELETE(req: Request, { params }: Params) {
         );
     }
 }
+
+export async function GET(req: Request, { params }: Params) {
+    try {
+        const {id} = params
+        const res = await Ticket.findOne({_id: id});
+        return NextResponse.json({res},{status: 200});
+    } catch (error) {
+        return NextResponse.json({error},{status: 500});
+    }
+}
+
+export async function PUT(req: Request, { params }: Params) {
+    try {
+        const {id} = params
+        const body = await req.json();
+        const updatedata = await Ticket.findByIdAndUpdate(id,{
+            ...body
+        })
+        return NextResponse.json({message: "Ticket updated"},{status: 200});
+    } catch (error) {
+        return NextResponse.json({error},{status: 500});
+    }
+}

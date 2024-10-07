@@ -12,6 +12,8 @@ export async function POST(req: Request){
         return NextResponse.json({message: "Error creating the Ticket",error},{status: 500})
     }
 }
+
+
 export async function GET(){
     try {
         const tickets = await Ticket.find();
